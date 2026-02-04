@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Repost Guess Who</title>
+    <style>
+        :root { --pink: #fe2c55; --cyan: #25f4ee; --bg: #000000; }
+        body { background: var(--bg); color: white; font-family: 'Arial Black', sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; overflow-x: hidden; }
+        .screen { text-align: center; width: 100%; max-width: 500px; display: none; padding: 15px; box-sizing: border-box; }
+        #start-menu { display: block; }
+        h1 { font-size: 3rem; line-height: 1.1; text-transform: uppercase; margin-bottom: 40px; color: white; text-shadow: -3px -3px 0 var(--cyan), 3px 3px 0 var(--pink); }
+        .play-now { background: var(--pink); color: white; padding: 18px 60px; border-radius: 50px; font-size: 1.4rem; font-weight: bold; border: none; cursor: pointer; text-transform: uppercase; width: 100%; max-width: 300px; }
+        
+        /* Mobile Optimized Viewport */
+        #viewport { position: relative; width: 100%; min-height: 60vh; background: #000; border-radius: 15px; border: 1px solid #333; overflow-y: auto; margin-bottom: 15px; display: flex; justify-content: center; align-items: center; }
+        .tiktok-embed { margin: 0 !important; width: 100% !important; min-width: unset !important; }
+        
+        .options { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+        .btn { background: #111; border: 1px solid #444; padding: 15px 2px; border-radius: 10px; color: white; font-weight: bold; cursor: pointer; font-size: 0.85rem; -webkit-tap-highlight-color: transparent; }
+        .correct { background: #2ecc71 !important; border-color: #2ecc71; }
+        .wrong { background: var(--pink) !important; border-color: var(--pink); }
+        .label { font-family: 'Helvetica', sans-serif; font-size: 0.75rem; color: #888; margin-bottom: 8px; }
+    </style>
+</head>
+<body>
+
+    <div id="start-menu" class="screen">
+        <h1>REPOST<br>GUESS WHO</h1>
+        <button class="play-now" onclick="startGame()">START GAME</button>
+    </div>
+
+    <div id="game-screen" class="screen">
+        <div id="stats" class="label">ROUND 1 • SCORE: 0</div>
+        <div id="viewport">
+            <div id="embed-container" style="width:100%;"></div>
+        </div>
+        <div class="options" id="options"></div>
+    </div>
+
+    <script>
+        // Data containing the 60 random links (20 for each person)
+        const quiz = [{"url": "https://www.tiktok.com/@aries/video/7519628145398467870", "answer": "Felix"}, {"url": "https://www.tiktok.com/@realpcbuilder/video/7594880930146258198", "answer": "Felix"}, {"url": "https://www.tiktok.com/@gior_venting/video/7518169859482537247", "answer": "Felix"}, {"url": "https://www.tiktok.com/@itsmelizzox/video/7596824809217084694", "answer": "Mdalire"}, {"url": "https://www.tiktok.com/@niceguyz/video/7511819277096291627", "answer": "Felix"}, {"url": "https://www.tiktok.com/@awomoalt/video/7597664098330938655", "answer": "Mdalire"}, {"url": "https://www.tiktok.com/@wesleynwosu_/video/7599825000559889694", "answer": "Mdalire"}, {"url": "https://www.tiktok.com/@versefried/video/7596514915033025822", "answer": "Mdalire"}, {"url": "https://www.tiktok.com/@babyloveth41/video/7597453881211227400", "answer": "Vanessa"}, {"url": "https://www.tiktok.com/@clockinteawitme/video/7596768707112619295", "answer": "Mdalire"}, {"url": "https://www.tiktok.com/@kia_251224_/video/7596659701291453716", "answer": "Vanessa"}, {"url": "https://www.tiktok.com/@ssiikkie/video/7598642851890695446", "answer": "Mdalire"}, {"url": "https://www.tiktok.com/@coach_unc_pork/video/7569009674868018445", "answer": "Vanessa"}, {"url": "https://www.tiktok.com/@bawonkle/video/7553599387490913558", "answer": "Felix"}, {"url": "https://www.tiktok.com/@user299372671/video/7597505772620205325", "answer": "Mdalire"}, {"url": "https://www.tiktok.com/@xmittenx/video/7564986493933063437", "answer": "Felix"}, {"url": "https://www.tiktok.com/@stephanieakoto/video/7591503169902071043", "answer": "Felix"}, {"url": "https://www.tiktok.com/@akoto.sexy/video/7594492274860379404", "answer": "Vanessa"}, {"url": "https://www.tiktok.com/@nataliireynoldss/video/7591196388587867422", "answer": "Vanessa"}, {"url": "https://www.tiktok.com/@not.cookieee/video/7597286563042708749", "answer": "Vanessa"}, {"url": "https://www.tiktok.com/@byefarzy/video/7594661131772333342", "answer": "Vanessa"}, {"url": "https://www.tiktok.com/@memesforyou_page/video/7596038732671716615", "answer": "Vanessa"}, {"url": "https://www.tiktok.com/@finca.rai/video/7586410195450907926", "answer": "Vanessa"}, {"url": "https://www.tiktok.com/@bonz2094/video/7597454539750444300", "answer": "Vanessa"}, {"url": "https://www.tiktok.com/@szaszasimo/video/7598539180544773398", "answer": "Mdalire"}, {"url": "https://www.tiktok.com/@felinx.q/video/7594215439224425750", "answer": "Mdalire"}, {"url": "https://www.tiktok.com/@iloveche101/video/7592277418094759182", "answer": "Mdalire"}, {"url": "https://www.tiktok.com/@lead.poisoning444/video/7509592022731345174", "answer": "Felix"}, {"url": "https://www.tiktok.com/@victor_ivyic/video/7592316149090520327", "answer": "Vanessa"}, {"url": "https://www.tiktok.com/@joyy_mazz/video/7599322416816459015", "answer": "Vanessa"}, {"url": "https://www.tiktok.com/@mrpancreas/video/7568333383424576786", "answer": "Felix"}, {"url": "https://www.tiktok.com/@masr.darr/video/7599558467682077970", "answer": "Mdalire"}, {"url": "https://www.tiktok.com/@squashbucket.productions/video/7564882585919261966", "answer": "Felix"}, {"url": "https://www.tiktok.com/@kvxqii/video/7598980557489376534", "answer": "Mdalire"}, {"url": "https://www.tiktok.com/@_forsyy/video/7591352203739286797", "answer": "Mdalire"}, {"url": "https://www.tiktok.com/@hephzyclips/video/7571207803184942356", "answer": "Vanessa"}, {"url": "https://www.tiktok.com/@onlyloye/video/7577354620939308295", "answer": "Vanessa"}, {"url": "https://www.tiktok.com/@sevgivarsaengelyok/video/7596708861067660552", "answer": "Vanessa"}, {"url": "https://www.tiktok.com/@szaszasimo/video/7598539180544773398", "answer": "Felix"}, {"url": "https://www.tiktok.com/@ma..nyajiek/video/7596663898602818827", "answer": "Mdalire"}, {"url": "https://www.tiktok.com/@call_me_kcee_01/video/7593308230479088916", "answer": "Vanessa"}, {"url": "https://www.tiktok.com/@..urf4vst4r/video/7599678103710928146", "answer": "Mdalire"}, {"url": "https://www.tiktok.com/@gmfzee/video/7569411916779506999", "answer": "Felix"}, {"url": "https://www.tiktok.com/@.aishawspeedd/video/7596000805933812994", "answer": "Felix"}, {"url": "https://www.tiktok.com/@melodycgb/video/7590180268426808597", "answer": "Mdalire"}, {"url": "https://www.tiktok.com/@nobodysausage/video/7600057322139815198", "answer": "Vanessa"}, {"url": "https://www.tiktok.com/@topcomedey05/video/7590388432745008415", "answer": "Vanessa"}, {"url": "https://www.tiktok.com/@a3theriscrestfallen/video/7599567529719155989", "answer": "Mdalire"}, {"url": "https://www.tiktok.com/@3luko/video/7573099379062558007", "answer": "Felix"}, {"url": "https://www.tiktok.com/@..urf4vst4r/video/7601485391946091794", "answer": "Mdalire"}, {"url": "https://www.tiktok.com/@tnk_2203/video/7490197520455355654", "answer": "Felix"}, {"url": "https://www.tiktok.com/@tre.011/video/7508158131394940190", "answer": "Felix"}, {"url": "https://www.tiktok.com/@benitarelates/video/7584077849376656661", "answer": "Vanessa"}, {"url": "https://www.tiktok.com/@fa1ry_t4le.3/video/7501855073622871327", "answer": "Felix"}, {"url": "https://www.tiktok.com/@edutswithfufu/video/7596738786873183519", "answer": "Mdalire"}, {"url": "https://www.tiktok.com/@xennoa/video/7597058405395631367", "answer": "Mdalire"}, {"url": "https://www.tiktok.com/@roblox/video/7528468560042134798", "answer": "Felix"}, {"url": "https://www.tiktok.com/@syrim/video/7568680195369028919", "answer": "Felix"}, {"url": "https://www.tiktok.com/@moonlightt_editz_/video/7594801691233455367", "answer": "Vanessa"}, {"url": "https://www.tiktok.com/@ybg.nutz/video/7486380139568237846", "answer": "Felix"}];
+
+        const names = ["Mdalire", "Felix", "Vanessa"];
+        let current = 0, score = 0;
+
+        function startGame() {
+            document.getElementById('start-menu').style.display = 'none';
+            document.getElementById('game-screen').style.display = 'block';
+            showRound();
+        }
+
+        function showRound() {
+            const data = quiz[current];
+            document.getElementById('stats').innerText = `ROUND ${current + 1} • SCORE: ${score}`;
+            
+            const container = document.getElementById('embed-container');
+            const videoId = data.url.split('/video/')[1]?.split('?')[0];
+            
+            // Set up the TikTok embed HTML
+            container.innerHTML = `
+                <blockquote class="tiktok-embed" cite="${data.url}" data-video-id="${videoId}">
+                    <section></section>
+                </blockquote>
+            `;
+
+            // Refresh the TikTok script to force re-render on mobile
+            const oldScript = document.querySelector('.tk-script');
+            if (oldScript) oldScript.remove();
+            
+            const script = document.createElement('script');
+            script.className = 'tk-script';
+            script.src = "https://www.tiktok.com/embed.js";
+            document.body.appendChild(script);
+
+            const grid = document.getElementById('options');
+            grid.innerHTML = '';
+            names.forEach(name => {
+                const b = document.createElement('button');
+                b.className = 'btn'; b.innerText = name;
+                b.onclick = () => checkAnswer(name, b);
+                grid.appendChild(b);
+            });
+        }
+
+        function checkAnswer(choice, btn) {
+            const buttons = document.querySelectorAll('.btn');
+            buttons.forEach(b => b.onclick = null);
+            if (choice === quiz[current].answer) {
+                btn.classList.add('correct');
+                score++;
+            } else {
+                btn.classList.add('wrong');
+                buttons.forEach(b => { if (b.innerText === quiz[current].answer) b.classList.add('correct'); });
+            }
+            setTimeout(nextRound, 1500);
+        }
+
+        function nextRound() {
+            current++;
+            if (current < quiz.length) { showRound(); } 
+            else { alert(`Game Over! Final Score: ${score}/${quiz.length}`); location.reload(); }
+        }
+    </script>
+</body>
+</html>
